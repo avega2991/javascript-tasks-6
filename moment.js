@@ -32,7 +32,7 @@ module.exports = function () {
             var daysCount = parseInt(diff / daySeconds);
             if (daysCount >= 1) {
                 diff -= daysCount * daySeconds;
-                verb = declineWord(daysCount, ['остался', 'осталось', 'осталось']) + ' ';
+                verbose = declineWord(daysCount, ['остался', 'осталось', 'осталось']) + ' ';
                 days = daysCount + ' ';
                 days += declineWord(daysCount, ['день', 'дня', 'дней']) + ' ';
             }
