@@ -22,8 +22,8 @@ module.exports.getAppropriateMoment = function (json, minDuration, workingHours)
 
     // 3. И записываем в appropriateMoment
     var timezone = workingHours.from.slice(-2);
-    appropriateMoment.date = getDate(robberyTime.from, timezone);
-    appropriateMoment.timezone = timezone;
+    appropriateMoment.date = robberyTime.from;
+    appropriateMoment.timezone = parseInt(timezone);
     return appropriateMoment;
 };
 
@@ -36,23 +36,6 @@ module.exports.getStatus = function (moment, robberyMoment) {
 
     return 'Ограбление уже идёт!';
 };
-
-function getDate(utcMinutes, timezone) {
-    var daysOfWeek = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
-    var dayIndex = Math.floor(utcMinutes / (24 * 60));
-    var day = daysOfWeek[dayIndex];
-    utcMinutes -= dayIndex * 24 * 60;
-    var hour = Math.floor(utcMinutes / 60);
-    utcMinutes -= hour * 60;
-    hour = numberToString(hour, 2);
-    utcMinutes = numberToString(utcMinutes, 2);
-    return day + ' ' + hour + ':' + utcMinutes + timezone;
-}
-
-function numberToString(number, numCount) {
-    --numCount;
-    return number < 10 * numCount ? '0' + number : number;
-}
 
 function getBankSchedule(bankTime) {
     var days = ['ПН', 'ВТ', 'СР'];
@@ -75,18 +58,10 @@ function normalize(data) {
 }
 
 function dateRangeToUTC(dateRange) {
-    return {from: parseToMinutesUTC(dateRange.from), to: parseToMinutesUTC(dateRange.to)};
-}
-
-function parseToMinutesUTC(time) {
-    var daysOfWeek = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
-    var timezone = parseInt(time.slice(-2));
-    var day = daysOfWeek.indexOf(time.slice(0, 2));
-    var hours = parseInt(time.slice(3, 5)) - timezone;
-    var minutes = parseInt(time.slice(6, 8));
-
-    var minutesUTC = minutes + hours * 60 + day * 24 * 60;
-    return minutesUTC;
+    return {
+        from: moment.parseToMinutesUTC(dateRange.from),
+        to: moment.parseToMinutesUTC(dateRange.to)
+    };
 }
 
 function substractRanges(minuendArray, subtraArray) {

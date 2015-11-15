@@ -1,7 +1,6 @@
 'use strict';
 
-var daySeconds = 60 * 60 * 24;
-var hourSeconds = 60 * 60;
+var dayMinutes = 24 * 60;
 var hourRegex = /([0-9]{2}:[0-9]{2})/;
 
 module.exports = function () {
@@ -14,8 +13,14 @@ module.exports = function () {
 
         // Выводит дату в переданном формате
         format: function (pattern) {
-            var day = this.date.split(' ')[0];
-            var time = this.date.match(hourRegex)[0];
+            var days = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
+            var dayIndex = Math.floor(this.date / dayMinutes);
+            var time = this.date - dayIndex * dayMinutes;
+            if (time + this.timezone * 60 < 0) {
+                dayIndex = dayIndex <= 0 ? days.length - 1 : dayIndex - 1;
+                time += dayMinutes;
+            }
+            var day = days[dayIndex];
             var result = pattern.replace('%DD', day);
             result = result.replace('%HH:%MM', getTime(time, this.timezone));
             return result;
@@ -28,21 +33,21 @@ module.exports = function () {
             var days = '';
             var hours = '';
             var minutes = '';
-            var diff = getSeconds(this.date) - getSeconds(moment.date);
-            var daysCount = parseInt(diff / daySeconds);
+            var diff = this.date - moment.date;
+            var daysCount = parseInt(diff / dayMinutes);
             if (daysCount >= 1) {
-                diff -= daysCount * daySeconds;
+                diff -= daysCount * dayMinutes;
                 verbose = declineWord(daysCount, ['остался', 'осталось', 'осталось']) + ' ';
                 days = daysCount + ' ';
                 days += declineWord(daysCount, ['день', 'дня', 'дней']) + ' ';
             }
-            var hoursCount = parseInt(diff / hourSeconds);
+            var hoursCount = parseInt(diff / 60);
             if (hoursCount >= 1) {
-                diff -= hoursCount * hourSeconds;
+                diff -= hoursCount * 60;
                 hours = hoursCount + ' ';
                 hours += declineWord(hoursCount, ['час', 'часа', 'часов']) + ' ';
             }
-            var minutesCount = parseInt(diff / 60);
+            var minutesCount = parseInt(diff);
             if (minutesCount != 0) {
                 minutes = minutesCount + ' ';
                 minutes += declineWord(minutesCount, ['минута', 'минуты', 'минут']) + ' ';
@@ -52,10 +57,27 @@ module.exports = function () {
     };
 };
 
+module.exports.parseToMinutesUTC = function (time) {
+    var daysOfWeek = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
+    var timezone = parseInt(time.slice(-2));
+    var day = daysOfWeek.indexOf(time.slice(0, 2));
+    var hours = parseInt(time.slice(3, 5)) - timezone;
+    var minutes = parseInt(time.slice(6, 8));
+
+    var minutesUTC = minutes + hours * 60 + day * dayMinutes;
+    return minutesUTC;
+};
+
 function getTime(time, timezone) {
-    var hour = time.split(':')[0];
-    var timezoneHours = hour - (-1) * timezone;
-    return timezoneHours + ':' + time.split(':')[1];
+    var hour = time / 60;
+    var minutes = time - hour * 60;
+    var timezoneHours = hour + timezone;
+    return numberToString(timezoneHours, 2) + ':' + numberToString(minutes, 2);
+}
+
+function numberToString(number, numCount) {
+    --numCount;
+    return number < 10 * numCount ? '0' + number : number;
 }
 
 function declineWord(number, decls) {
