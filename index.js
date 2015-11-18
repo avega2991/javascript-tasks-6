@@ -48,13 +48,13 @@ var currentMoment = moment();
 
 // Как во всех фильмах про ограбления мы будем писать:
 
-currentMoment.date = moment.parseToMinutesUTC('ПН 09:01+5');
+currentMoment.date = 'ПН 09:01+5';
 console.log(
     robbery.getStatus(currentMoment, robberyMoment)
 );
 // «До ограбления остался 1 день 6 часов 59 минут»
 
-currentMoment.date = moment.parseToMinutesUTC('ПН 12:59+5');
+currentMoment.date = 'ПН 12:59+5';
 console.log(
     robbery.getStatus(currentMoment, robberyMoment)
 );

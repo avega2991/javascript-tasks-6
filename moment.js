@@ -6,7 +6,15 @@ var hourRegex = /([0-9]{2}:[0-9]{2})/;
 module.exports = function () {
     return {
         // Здесь как-то хранится дата ;)
-        date: null,
+        _date: null,
+
+        get date() {
+            return this._date;
+        },
+
+        set date(dateData) {
+            this._date = module.exports.parseToMinutesUTC(dateData);
+        },
 
         // А здесь часовой пояс
         timezone: null,
@@ -58,6 +66,9 @@ module.exports = function () {
 };
 
 module.exports.parseToMinutesUTC = function (time) {
+    if (!isNaN(parseInt(time))) {
+        return time;
+    }
     var daysOfWeek = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
     var timezone = parseInt(time.slice(-2));
     var day = daysOfWeek.indexOf(time.slice(0, 2));
